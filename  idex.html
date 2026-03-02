@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人生算法 | 深度解析控制台</title>
+    <style>
+        :root {
+            --bg-dark: #0a0a0c;
+            --bg-card: #16161a;
+            --primary-gold: #d4af37;
+            --primary-blue: #3b82f6;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border-color: #2d3748;
+            --danger: #f56565;
+            --success: #48bb78;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* 头部 Banner */
+        header {
+            text-align: center;
+            padding: 80px 20px 50px;
+            background: radial-gradient(circle at top, #1a1a24 0%, var(--bg-dark) 80%);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        header h1 {
+            font-size: 3.5rem;
+            color: var(--primary-gold);
+            margin-bottom: 15px;
+            letter-spacing: 4px;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* 三轨切换 Tabs */
+        .plan-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+        }
+
+        .plan-btn {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .plan-btn.active {
+            border-color: var(--primary-gold);
+            color: var(--primary-gold);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+            background: rgba(212, 175, 55, 0.05);
+        }
+
+        .plan-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .plan-content.active {
+            display: block;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 40px;
+            color: #fff;
+        }
+        .section-title span { color: var(--primary-blue); }
+
+        /* A计划：3D翻转卡片 */
+        .nine-levels {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .flip-card {
+            background-color: transparent;
+            height: 280px;
+            perspective: 1000px;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: left;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+        }
+
+        .flip-card-front {
+            background: var(--bg-card);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .flip-card-back {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            transform: rotateY(180deg);
+            border-color: var(--primary-blue);
+            overflow-y: auto;
+        }
+
+        .level-num {
+            font-size: 4rem;
+            font-weight: 900;
+            color: rgba(59, 130, 246, 0.08);
+            position: absolute;
+            top: -15px;
+            right: 10px;
+        }
+
+        .flip-card-front h3 {
+            font-size: 1.6rem;
+            color: #fff;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary-blue);
+            padding-left: 10px;
+        }
+
+        .flip-card-back h4 {
+            color: var(--primary-gold);
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            padding-bottom: 5px;
+        }
+
+        .flip-card-back p {
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            color: #cbd5e1;
+        }
+
+        /* B计划 & C计划 样式 */
+        .category-group {
+            margin-bottom: 40px;
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .category-title {
+            font-size: 1.3rem;
+            color: var(--primary-gold);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .problems-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .problem-tag {
+            background: #1a202c;
+            border: 1px solid #4a5568;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .problem-tag:hover {
+            background: var(--primary-blue);
+            color: #fff;
+            border-color: var(--primary-blue);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .model-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .model-info { flex: 1; }
+        .model-info h3 { color: var(--primary-gold); font-size: 1.5rem; margin-bottom: 15px; }
+        .model-info ul { margin-left: 20px; color: var(--text-muted); margin-top: 10px; }
+        .model-info li { margin-bottom: 8px; }
+
+        .model-visual {
+            flex: 1;
+            background: #000;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px dashed #4a5568;
+            text-align: center;
+            color: var(--primary-blue);
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+
+        /* 富文本弹窗 */
+        .custom-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .custom-modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--primary-gold);
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.8);
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .modal-header {
+            font-size: 1.8rem;
+            color: var(--primary-gold);
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .modal-body .trap {
+            background: rgba(245, 101, 101, 0.1);
+            border-left: 4px solid var(--danger);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .modal-body .solution {
+            background: rgba(72, 187, 120, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .modal-close-btn {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .modal-close-btn:hover { background: #2563eb; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+        @media (max-width: 768px) {
+            .model-card { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>人生算法</h1>
+        <p>用概率思维做好决策 | 深度解析与底层逻辑控制台</p>
+    </header>
+
+    <div class="container">
+        
+        <div class="plan-tabs">
+            <button class="plan-btn active" onclick="switchPlan('planA', this)">A计划：九段心法 (向内)</button>
+            <button class="plan-btn" onclick="switchPlan('planB', this)">B计划：18个难题 (向外)</button>
+            <button class="plan-btn" onclick="switchPlan('planC', this)">C计划：核心模型库</button>
+        </div>
+
+        <!-- A计划内容：3D翻转卡片 (完整9段) -->
+        <div id="planA" class="plan-content active">
+            <h2 class="section-title">向内求解：<span>九段心法深度解析</span></h2>
+            <p style="text-align: center; margin-bottom: 30px; color: var(--text-muted);">💡 鼠标悬停卡片，查看深度落地指南</p>
+            <div class="nine-levels">
+                <!-- 卡片1 -->
+                <div class="flip-card">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="level-num">01</div>
+                            <h3>初段：闭环</h3>
+                            <p>完成比完美更重要。建立“感知-认知-决策-行动”的最小闭环。</p>
+                        </div>
+                        <div class="flip-card-back">
+                            <h4>深度解析</h4>
+                            <p>大部分人的失败在于停留在“认知”阶段，没有形成闭环。哪怕是一个极度粗糙的行动，只要能获得外界反馈，就优于完美的空想。</p>
+                            <h4>落地指南</h4>
+                            <p>1. 设定MVP（最小可行性产品）。<br>2. 接受早期的粗糙与失败。<br>3. 强制自己按下“发布/执行”键。</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 卡片2 -->
+                <div class="flip-card">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="level-num">02</div>
+                            <h3>二段：切换</h3>
+                            <p>掌控大脑的两种模式。在“直觉”与“理性”之间自如切换。</p>
+                        </div>
+                        <div class="flip-card-back">
+                            <h4>深度解析</h4>
+                            <p>丹尼尔·卡尼曼的《思考，快与慢》。系统1（快思考）负责日常低成本运转；系统2（慢思考）负责重大决策。</p>
+                            <h4>落地指南</h4>
+                            <p>1. 识别高风险决策点，强制唤醒系统2。<br>2. 日常琐事交给系统1，节省脑力。<br>3. 建立决策检查清单（Checklist）。</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 卡片3 -->
+                <div class="flip-card">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="level-num">03</div>
+                            <h3>三段：内控</h3>
+                            <p>跑好大脑的四人接力赛：感知、认知、决策、行动。</p>
+                        </div>
+                        <div class="flip-card-back">
+                            <h4>深度解析</h4>
+                            <p>一个人内部其实是一个团队。感知要像孩童般好奇；认知要像灰度般包容；决策要像黑白般决绝；行动要像疯子般狂热。</p>
+                            <h4>落地指南</h4>
+                            <p>切忌在行动时犹豫（认知干扰行动），也切忌在认知时偏激（决策干扰认知）。各司其职。</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 卡片4 (新增) -->
+                <div class="flip-card">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="level-num">04</div>
+                            <h3>四段：重启</h3>
+                            <p>破除自我中心，把自我当成客体，随时具备清零的能力。</p>
+                        </div>
+                        <div class="flip-card-back">
+                            <h4>深度解析</h4>
+                            <p>过去的沉没成本是阻碍进化的最大障碍。高手懂得“客体化”，像观察别人一样观察自己，随时纠错。</p>
+                            <h4>落地指南</h4>
+                            <p>1. 遇到挫折时，问自己：“如果是一个陌生人遇到这事，我会怎么建议他？”<br>2. 勇于承认“我错了”，快速止损。</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 卡片5 (新增) -->
+                <div class="flip-card">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="level-num">05</div>
+                            <h3>五段：增长</h3>
+                            <p>寻找破局点，利用杠杆实现非线性（指数级）增长。</p>
+                        </div>
+                        <div class="flip-card-back">
+                            <h4>深度解析</h4>
+                            <p>线性增长靠勤奋，指数增长靠杠杆。在正确的赛道上，找到那个能撬动全局的支点（如技术、资本、网络效应）。</p>
+                            <h4>落地指南</h4>
+                            <p>1. 停止用战术上的勤奋掩盖战略上的懒惰。<br>2. 寻找边际成本递减的业务模式。<br>3. 善用工具和他人时间。</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 卡片6 -->
+                <div class="flip-card">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="level-num">06</div>
+                            <h3>六段：内核</h3>
+                            <p>找到可复制的最小内核。简单、可复制、大规模。</p>
+                        </div>
+                        <div class="flip-card-back">
+                            <h4>深度解析</h4>
+                            <p>麦当劳的内核不是汉堡，而是标准化的SOP。个人成长的内核是一个能持续产生价值的标准化技能或产品。</p>
+                            <h4>落地指南</h4>
+                            <p>1. 剥离复杂性，找到最核心的价值点。<br>2. 将其流程化、工具化。<br>3. 借助杠杆（资本、代码、媒体）放大。</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 卡片7 -->
+                <div class="flip-card">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="level-num">07</div>
+                            <h3>七段：复利</h3>
+                            <p>营造长期的局部垄断。经得起时间考验，做到延迟满足。</p>
+                        </div>
+                        <div class="flip-card-back">
+                            <h4>深度解析</h4>
+                            <p>复利不仅是财务概念，更是人生算法。前提是“活得久”且“方向对”。在自己的优势领域建立护城河。</p>
+                            <h4>落地指南</h4>
+                            <p>1. 寻找具有积累效应的事情（如写作、代码、品牌）。<br>2. 拒绝短期诱惑，忍受平庸期。<br>3. 保持微小的持续正向增长。</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 卡片8 (新增) -->
+                <div class="flip-card">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="level-num">08</div>
+                            <h3>八段：愿景</h3>
+                            <p>建立长期主义的灯塔，用意义对冲短期的波动与痛苦。</p>
+                        </div>
+                        <div class="flip-card-back">
+                            <h4>深度解析</h4>
+                            <p>没有愿景的算法是盲目的计算器。愿景是最高级的护城河，它能让你在面临绝境时依然有动力坚持下去。</p>
+                            <h4>落地指南</h4>
+                            <p>1. 思考“墓志铭法则”：你希望死后被人如何评价？<br>2. 将长期愿景拆解为短期可执行的OKR。<br>3. 寻找同频的同行者。</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 卡片9 -->
+                <div class="flip-card">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="level-num">09</div>
+                            <h3>九段：涌现</h3>
+                            <p>发挥群体智慧。把人生当作一个有算法的系统来经营。</p>
+                        </div>
+                        <div class="flip-card-back">
+                            <h4>深度解析</h4>
+                            <p>当系统复杂到一定程度，会产生个体不具备的新特性（涌现）。从单打独斗走向构建生态、连接他人。</p>
+                            <h4>落地指南</h4>
+                            <p>1. 多投入“资产”（能生钱/生资源的东西），少投入“费用”（一次性消耗）。<br>2. 成为网络中的超级节点。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- B计划内容：分类矩阵与富文本弹窗 -->
+        <div id="planB" class="plan-content">
+            <h2 class="section-title">向外探索：<span>18个难题的破局点</span></h2>
+            
+            <div class="category-group">
+                <div class="category-title">🧠 认知陷阱篇</div>
+                <div class="problems-grid">
+                    <div class="problem-tag" onclick="openRichModal('片面', '认为成功全靠个人努力或全靠运气。', '用三个运气旋钮（老板、教练、车手）打开人生局面。区分可控与不可控。')">片面</div>
+                    <div class="problem-tag" onclick="openRichModal('狭隘', '只看重眼前的确定性收益，厌恶一切风险。', '穷人思维是打折甩卖了概率权与时间权。富人思维是计算期望值，拥抱正向的随机性。')">狭隘</div>
+                    <div class="problem-tag" onclick="openRichModal('迷信', '寻找绝对的真理和一劳永逸的秘籍。', '科学不过是阶段性正确。建立贝叶斯思维，大胆假设，根据新信息不断更新概率。')">迷信</div>
+                    <div class="problem-tag" onclick="openRichModal('无知', '只懂单一维度的知识，手里只有锤子。', '成为混合算法高手，兼顾理科的“算法”（逻辑/概率）与文科的“心法”（共情/意义）。')">无知</div>
+                </div>
+            </div>
+
+            <div class="category-group">
+                <div class="category-title">⚖️ 决策博弈篇</div>
+                <div class="problems-grid">
+                    <div class="problem-tag" onclick="openRichModal('犹豫', '在收集信息和采取行动之间摇摆不定，错失良机。', '灰度认知，黑白决策。认知世界时要包容不确定性，但一旦按下决策键，必须果断如黑白。')">犹豫</div>
+                    <div class="problem-tag" onclick="openRichModal('冲动', '被情绪裹挟，凭直觉做出重大决定。', '像AlphaGo一样，先用直觉（蒙特卡洛树搜索）圈定大致范围，再用理性（价值网络）计算最优解。')">冲动</div>
+                    <div class="problem-tag" onclick="openRichModal('武断', '过度自信，听不进反面意见。', '运用“双我思维”，让理性的我与潜意识的我对话，甚至引入外部的“红军”进行对抗演练。')">武断</div>
+                    <div class="problem-tag" onclick="openRichModal('模糊', '目标不清晰，用战术上的勤奋掩盖战略上的懒惰。', '量化范围比精确数字更重要，学会使用OKR（目标与关键结果），让模糊的方向变得可衡量。')">模糊</div>
+                </div>
+            </div>
+
+            <div class="category-group">
+                <div class="category-title">💰 财富与风险篇</div>
+                <div class="problems-grid">
+                    <div class="problem-tag" onclick="openRichModal('爆仓', '为了追求高收益，押上全部身家（All in）。', '防爆思维是财富第一法则。只要有1%的概率归零，乘以任何数字都是零。运用凯利公式控制仓位。')">爆仓</div>
+                    <div class="problem-tag" onclick="openRichModal('贪婪', '什么都想要，盲目扩张自己的边界。', '用半径算法找准定位：扩大认知半径（多学），明确能力半径（知道自己能干啥），减小行动半径（专注击穿）。')">贪婪</div>
+                    <div class="problem-tag" onclick="openRichModal('侥幸', '面对小概率的灾难性事件，认为“不会发生在我身上”。', '在随机性面前处变不惊，利用帕斯卡赌注（如果代价极小而收益极大，就应该去做；反之坚决不做）。')">侥幸</div>
+                    <div class="problem-tag" onclick="openRichModal('霉运', '抱怨自己运气差，生不逢时。', '在基础比率高（水多）的地方挖井。选择一个顺风的赛道，用大数定律改变“运气的运气”。')">霉运</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- C计划：核心模型 -->
+        <div id="planC" class="plan-content">
+            <h2 class="section-title">底层支撑：<span>核心数学/概率模型</span></h2>
+            
+            <div class="model-card">
+                <div class="model-info">
+                    <h3>1. 贝叶斯定理 (Bayes' Theorem)</h3>
+                    <p>不要追求一次性的绝对真理，而是根据新发生的事实，不断调整自己的判断。</p>
+                    <ul>
+                        <li><strong>先验概率：</strong> 基于历史经验的初始判断。</li>
+                        <li><strong>新信息：</strong> 现实中新观察到的证据。</li>
+                        <li><strong>后验概率：</strong> 结合新信息后，更新后的更准确的判断。</li>
+                    </ul>
+                </div>
+                <div class="model-visual">
+                    P(A|B) = [P(B|A) * P(A)] / P(B)<br><br>
+                    <span style="font-size: 0.9rem; color: var(--text-muted);">观点随事实而改变，这不叫善变，叫进化。</span>
+                </div>
+            </div>
+
+            <div class="model-card">
+                <div class="model-info">
+                    <h3>2. 凯利公式 (Kelly Criterion)</h3>
+                    <p>在有正期望值的赌局（投资）中，计算出最佳的下注比例，既能实现财富最大化，又能避免破产（爆仓）。</p>
+                    <ul>
+                        <li><strong>核心启示1：</strong> 期望值为负时，绝不下注。</li>
+                        <li><strong>核心启示2：</strong> 即使胜率再高，也绝对不能 All in（全押）。</li>
+                    </ul>
+                </div>
+                <div class="model-visual">
+                    f* = (bp - q) / b<br><br>
+                    <span style="font-size: 0.9rem; color: var(--text-muted);">f*=下注比例, p=胜率, q=败率, b=赔率</span>
+                </div>
+            </div>
+
+            <div class="model-card">
+                <div class="model-info">
+                    <h3>3. 基础比率 (Base Rate)</h3>
+                    <p>做决策时，不要只看眼前的特殊情况，要看这类事情在全局中的平均成功率。</p>
+                    <ul>
+                        <li><strong>误区：</strong> 看到别人开奶茶店赚钱，觉得自己也能行。</li>
+                        <li><strong>正解：</strong> 查阅全行业奶茶店的存活率（基础比率可能只有10%）。</li>
+                        <li><strong>应用：</strong> 永远去“基础比率”高的地方竞争。</li>
+                    </ul>
+                </div>
+                <div class="model-visual">
+                    基础比率 > 个人特质<br><br>
+                    <span style="font-size: 0.9rem; color: var(--text-muted);">在干旱的沙漠里，最顶尖的打井专家也挖不出水。</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 富文本弹窗组件 -->
+    <div id="richModal" class="custom-modal-overlay">
+        <div class="custom-modal-content">
+            <h3 class="modal-header" id="modalTitle">难题标题</h3>
+            <div class="modal-body">
+                <div class="trap">
+                    <strong>⚠️ 常见陷阱（穷人思维）：</strong>
+                    <p id="modalTrap" style="margin-top: 5px;"></p>
+                </div>
+                <div class="solution">
+                    <strong>💡 算法破解（富人思维）：</strong>
+                    <p id="modalSolution" style="margin-top: 5px;"></p>
+                </div>
+            </div>
+            <button class="modal-close-btn" onclick="closeRichModal()">吸收算法</button>
+        </div>
+    </div>
+
+    <script>
+        // 切换 Tabs
+        function switchPlan(planId, btn) {
+            document.querySelectorAll('.plan-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.plan-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(planId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        // 打开富文本弹窗
+        function openRichModal(title, trap, solution) {
+            document.getElementById('modalTitle').innerText = '破解【' + title + '】';
+            document.getElementById('modalTrap').innerText = trap;
+            document.getElementById('modalSolution').innerText = solution;
+            
+            document.getElementById('richModal').style.display = 'flex';
+        }
+
+        // 关闭弹窗
+        function closeRichModal() {
+            document.getElementById('richModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
